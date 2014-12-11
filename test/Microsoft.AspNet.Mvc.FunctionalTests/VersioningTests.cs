@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.TestHost;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -15,17 +12,14 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
 {
     public class VersioningTests
     {
-        private readonly IServiceProvider _services = TestHelper.CreateServices("VersioningWebSite");
-        private readonly Action<IApplicationBuilder> _app = new VersioningWebSite.Startup().Configure;
-
         [Theory]
         [InlineData("1")]
         [InlineData("2")]
         public async Task AttributeRoutedAction_WithVersionedRoutes_IsNotAmbiguous(string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/Addresses?version=" + version);
@@ -49,8 +43,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task AttributeRoutedAction_WithAmbiguousVersionedRoutes_CanBeDisambiguatedUsingOrder(string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
             var query = "?version=" + version;
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api/Addresses/All" + query);
 
@@ -74,8 +68,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1Operations_OnTheSameController_WithNoVersionSpecified()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Tickets");
@@ -97,8 +91,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1Operations_OnTheSameController_WithVersionSpecified()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Tickets?version=2");
@@ -118,8 +112,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1OperationsWithParameters_OnTheSameController()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Tickets/5");
@@ -139,8 +133,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1OperationsWithParameters_OnTheSameController_WithVersionSpecified()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Tickets/5?version=2");
@@ -168,8 +162,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachOtherVersionOperations_OnTheSameController(string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Tickets?version=" + version);
@@ -194,8 +188,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanNotReachOtherVersionOperations_OnTheSameController_WithNoVersionSpecified()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Tickets");
@@ -203,9 +197,6 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-
-            var body = await response.Content.ReadAsByteArrayAsync();
-            Assert.Empty(body);
         }
 
         [Theory]
@@ -221,8 +212,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(new HttpMethod(method), "http://localhost/Tickets/5?version=" + version);
@@ -249,8 +240,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanNotReachOtherVersionOperationsWithParameters_OnTheSameController_WithNoVersionSpecified(string method)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(new HttpMethod(method), "http://localhost/Tickets/5");
@@ -258,9 +249,6 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-
-            var body = await response.Content.ReadAsByteArrayAsync();
-            Assert.Empty(body);
         }
 
         [Theory]
@@ -270,8 +258,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanUseOrderToDisambiguate_OverlappingVersionRanges(string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Books?version=" + version);
@@ -294,8 +282,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_OverlappingVersionRanges_FallsBackToLowerOrderAction(string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Books?version=" + version);
@@ -318,8 +306,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1Operations_OnTheOriginalController_WithNoVersionSpecified(string method, string action)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(new HttpMethod(method), "http://localhost/Movies");
@@ -341,8 +329,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1Operations_OnTheOriginalController_WithVersionSpecified(string method, string action)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(new HttpMethod(method), "http://localhost/Movies?version=2");
@@ -365,8 +353,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1OperationsWithParameters_OnTheOriginalController(string method, string action)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(new HttpMethod(method), "http://localhost/Movies/5");
@@ -388,8 +376,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachV1OperationsWithParameters_OnTheOriginalController_WithVersionSpecified(string method, string action)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(new HttpMethod(method), "http://localhost/Movies/5?version=2");
@@ -409,8 +397,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanReachOtherVersionOperationsWithParameters_OnTheV2Controller()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Put, "http://localhost/Movies/5?version=2");
@@ -433,8 +421,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanHaveTwoRoutesWithVersionOnTheUrl_OnTheSameAction(string url)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/" + url);
@@ -456,8 +444,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanHaveTwoRoutesWithVersionOnTheUrl_OnDifferentActions(string url, string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/" + url);
@@ -479,8 +467,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanHaveTwoRoutesWithVersionOnTheUrl_OnDifferentActions_WithInlineConstraint(string url, string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Post, "http://localhost/" + url);
@@ -505,8 +493,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanProvideVersioningInformation_UsingPlainActionConstraint(string url, string query, string actionName)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/" + url + query);
@@ -526,8 +514,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_ConstraintOrder_IsRespected()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Post, "http://localhost/" + "Customers?version=2");
@@ -547,8 +535,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_CanUseConstraintOrder_ToChangeSelectedAction()
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
 
             // Act
             var message = new HttpRequestMessage(HttpMethod.Delete, "http://localhost/" + "Customers/5?version=2");
@@ -570,8 +558,8 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         public async Task VersionedApi_MultipleVersionsUsingAttributeRouting_OnTheSameMethod(string version)
         {
             // Arrange
-            var server = TestServer.Create(_services, _app);
-            var client = server.CreateClient();
+            var site = TestWebSite.Create(nameof(VersioningWebSite));
+            var client = site.CreateClient();
             var path = "/" + version + "/Vouchers?version=" + version;
 
             // Act

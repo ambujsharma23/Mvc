@@ -15,9 +15,14 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
     {
         public static ITestWebSite Create(string webSiteName)
         {
+            return Create(webSiteName, TestHelper.WebsitesDirectoryPath);
+        }
+
+        public static ITestWebSite Create(string webSiteName, string searchLocation)
+        {
             if (IsInMemoryServer)
             {
-                var services = TestHelper.CreateServices(webSiteName);
+                var services = TestHelper.CreateServices(webSiteName, searchLocation);
 
                 var assembly = Assembly.Load(new AssemblyName(webSiteName));
 
@@ -27,14 +32,17 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                 var startup = Activator.CreateInstance(startupType);
                 var configure = (Action<IApplicationBuilder>)method.CreateDelegate(typeof(Action<IApplicationBuilder>), startup);
 
-                var server = TestHost.TestServer.Create(services, configure);
-
-                return new InMemoryWebSite()
+                using (TestHelper.ReplaceCallContextServiceLocationService(services))
                 {
-                    BaseUrl = "http://localhost",
-                    Host = "localhost",
-                    Inner = server,
-                };
+                    var server = TestHost.TestServer.Create(services, configure);
+
+                    return new InMemoryWebSite()
+                    {
+                        BaseUrl = "http://localhost",
+                        Host = "localhost",
+                        Inner = server,
+                    };
+                }
             }
             else
             {
@@ -88,6 +96,11 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                 // Don't follow redirects, we want to examine the HTTP output.
                 // This is consistent with how the in-memory client behaves.
                 handler.AllowAutoRedirect = false;
+
+                // Manually perform any sort of cookie handling.
+                // This is consistent with how the in-memory client behaves.
+                handler.UseCookies = false;
+
                 return new HttpClient(handler);
             }
         }

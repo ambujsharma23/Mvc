@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             }
         }
 
-        [Theory]
+        [InMemoryTheory("Requires Custom Services")]
         [MemberData(nameof(InstrumentationData))]
         public async Task ViewsAreServedWithoutInstrumentationByDefault(string actionName,
                                                                         string expected,
@@ -112,7 +112,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             Assert.Empty(context.Values);
         }
 
-        [Theory]
+        [InMemoryTheory("Requires Custom Services")]
         [MemberData(nameof(InstrumentationData))]
         public async Task ViewsAreInstrumentedWhenPageExecutionListenerFeatureIsEnabled(string actionName,
                                                                                         string expected,
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             Assert.Equal(expectedLineMappings, context.Values);
         }
 
-        [Theory]
+        [InMemoryTheory("Requires Custom Services")]
         [MemberData(nameof(InstrumentationData))]
         public async Task ViewsCanSwitchFromRegularToInstrumented(string actionName,
                                                                   string expected,
@@ -163,7 +163,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             Assert.Equal(expectedLineMappings, context.Values);
         }
 
-        [Fact]
+        [InMemoryFact("Requires Custom Services")]
         public async Task SwitchingFromNonInstrumentedToInstrumentedWorksForLayoutAndViewStarts()
         {
             // Arrange - 1

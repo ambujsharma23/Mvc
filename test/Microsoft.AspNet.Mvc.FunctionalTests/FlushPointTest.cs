@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
         private readonly IServiceProvider _provider = TestHelper.CreateServices("RazorWebSite");
         private readonly Action<IApplicationBuilder> _app = new Startup().Configure;
 
-        [Fact]
+        [InMemoryFact("Requires Custom Services")]
         public async Task FlushPointsAreExecutedForPagesWithLayouts()
         {
             var waitService = new WaitService();
@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                         GetTrimmedString(stream));
         }
 
-        [Fact]
+        [InMemoryFact("Requires Custom Services")]
         public async Task FlushPointsAreExecutedForPagesWithoutLayouts()
         {
             var waitService = new WaitService();
@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             Assert.Equal("Final content", GetTrimmedString(stream));
         }
 
-        [Theory]
+        [InMemoryTheory("Requires Custom Services")]
         [InlineData("PageWithPartialsAndViewComponents", "FlushAsync invoked inside RenderSection")]
         [InlineData("PageWithRenderSectionAsync", "FlushAsync invoked inside RenderSectionAsync")]
         public async Task FlushPointsAreExecutedForPagesWithComponentsPartialsAndSections(string action, string title)

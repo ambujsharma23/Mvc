@@ -18,8 +18,11 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
 {
     public static class TestHelper
     {
-        // Path from Mvc\\test\\Microsoft.AspNet.Mvc.FunctionalTests
-        private static readonly string WebsitesDirectoryPath = Path.Combine("..", "WebSites");
+        // relative path from functional tests to samples
+        public static readonly string SamplesDirectoryPath = Path.Combine("..", "..", "samples");
+
+        // relative path from functional tests to test websites
+        public static readonly string WebsitesDirectoryPath = Path.Combine("..", "WebSites");
 
         public static IServiceProvider CreateServices(string applicationWebSiteName, IServiceCollection newServices = null)
         {
